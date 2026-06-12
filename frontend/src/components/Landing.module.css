@@ -1,0 +1,105 @@
+.page { min-height: 100vh; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+
+.noise {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px;
+}
+
+.header {
+  position: relative; z-index: 1;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.5rem 2.5rem; border-bottom: 1px solid var(--border);
+}
+
+.logo { font-family: var(--display); font-weight: 800; font-size: 1.25rem; letter-spacing: -0.02em; }
+.logo span { color: var(--accent); }
+
+.headerRight { display: flex; align-items: center; gap: 0.75rem; }
+
+.navBtn {
+  font-size: 0.85rem; color: var(--muted); background: none;
+  border: 1px solid var(--border); padding: 5px 14px; border-radius: 8px;
+  cursor: pointer; font-family: var(--sans); transition: all 0.15s;
+}
+.navBtn:hover { color: var(--text); border-color: var(--border2); }
+
+.badge, .emailBadge {
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  border: 1px solid var(--border2); padding: 4px 10px; border-radius: 100px;
+}
+
+.main { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 5rem 2rem 4rem; width: 100%; }
+
+.hero { margin-bottom: 3rem; }
+
+.tag {
+  display: inline-block; font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent);
+  border: 1px solid rgba(255,59,59,0.3); padding: 4px 12px;
+  border-radius: 100px; margin-bottom: 1.5rem;
+}
+
+.title {
+  font-family: var(--display); font-size: clamp(3rem, 8vw, 5.5rem);
+  font-weight: 800; line-height: 1; letter-spacing: -0.03em;
+  color: var(--text); margin-bottom: 1.5rem;
+}
+
+.sub { font-size: 1.05rem; color: var(--muted); font-weight: 300; line-height: 1.7; max-width: 500px; }
+
+.dropzone {
+  border: 1.5px dashed var(--border2); border-radius: 16px; padding: 3rem 2rem;
+  text-align: center; cursor: pointer; transition: all 0.2s;
+  background: var(--bg2); margin-bottom: 1.5rem; position: relative; overflow: hidden;
+}
+.dropzone::before {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255,59,59,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.dropzone:hover, .dragging { border-color: var(--accent); background: rgba(255,59,59,0.04); }
+
+.dropIcon {
+  width: 52px; height: 52px; border-radius: 12px;
+  background: var(--bg3); border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1rem; color: var(--muted); transition: all 0.2s;
+}
+.dropzone:hover .dropIcon, .dragging .dropIcon {
+  color: var(--accent); border-color: var(--accent); background: rgba(255,59,59,0.1);
+}
+
+.dropLabel { font-family: var(--display); font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 0.4rem; }
+.dropHint  { font-size: 0.85rem; color: var(--muted); }
+
+.error {
+  background: rgba(255,59,59,0.08); border: 1px solid rgba(255,59,59,0.3);
+  border-radius: 10px; padding: 0.75rem 1rem; font-size: 0.9rem;
+  color: var(--accent); margin-bottom: 1.5rem;
+}
+
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+
+.step {
+  display: flex; flex-direction: column; gap: 0.3rem;
+  padding: 1.25rem; background: var(--bg2);
+  border: 1px solid var(--border); border-radius: 12px;
+}
+.stepNum { font-family: var(--mono); font-size: 11px; color: var(--accent); margin-bottom: 0.25rem; }
+.step strong { font-weight: 500; font-size: 0.9rem; color: var(--text); }
+.step span   { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+.banks { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+.banksLabel { font-size: 0.82rem; color: var(--muted); margin-right: 0.25rem; }
+.bankTag {
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  background: var(--bg3); border: 1px solid var(--border);
+  padding: 3px 10px; border-radius: 100px;
+}
+
+@media (max-width: 600px) {
+  .steps { grid-template-columns: 1fr; }
+  .header { padding: 1rem 1.25rem; }
+  .main { padding: 3rem 1.25rem 3rem; }
+}

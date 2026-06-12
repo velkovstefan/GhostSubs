@@ -1,0 +1,159 @@
+.page { min-height: 100vh; background: var(--bg); }
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 2.5rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0;
+  background: rgba(10,10,11,0.92);
+  backdrop-filter: blur(12px);
+  z-index: 10;
+}
+
+.logo { font-family: var(--display); font-weight: 800; font-size: 1.1rem; letter-spacing: -0.02em; }
+.logo span { color: var(--accent); }
+
+.back, .logoutBtn {
+  font-size: 0.85rem; color: var(--muted); background: none;
+  border: 1px solid var(--border); padding: 6px 14px; border-radius: 8px;
+  cursor: pointer; font-family: var(--sans); transition: all 0.15s;
+}
+.back:hover, .logoutBtn:hover { color: var(--text); border-color: var(--border2); }
+
+.main { max-width: 800px; margin: 0 auto; padding: 3rem 2rem 6rem; }
+
+.hero {
+  display: flex; align-items: center; gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.avatar {
+  width: 56px; height: 56px; border-radius: 14px;
+  background: rgba(255,59,59,0.12); border: 1px solid rgba(255,59,59,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--display); font-size: 1.5rem; font-weight: 800;
+  color: var(--accent); flex-shrink: 0;
+}
+
+.email { font-family: var(--display); font-size: 1.5rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+.since { font-size: 0.85rem; color: var(--muted); font-family: var(--mono); }
+
+.stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem; margin-bottom: 2.5rem;
+}
+
+.stat {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.25rem;
+  display: flex; flex-direction: column; gap: 0.3rem;
+}
+.accentStat { background: rgba(255,59,59,0.06); border-color: rgba(255,59,59,0.25); }
+
+.statLabel { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+.statValue { font-family: var(--display); font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; }
+.accentStat .statValue { color: var(--accent); }
+
+.section { }
+.sectionTitle {
+  font-family: var(--display); font-size: 1.1rem; font-weight: 700;
+  letter-spacing: -0.01em; margin-bottom: 1rem;
+}
+
+.empty { color: var(--muted); font-size: 0.9rem; }
+
+.emptyCard {
+  background: var(--bg2); border: 1px dashed var(--border2);
+  border-radius: 14px; padding: 3rem 2rem; text-align: center;
+}
+.emptyTitle { font-family: var(--display); font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+.emptySub { font-size: 0.88rem; color: var(--muted); margin-bottom: 1.5rem; }
+.uploadBtn {
+  padding: 8px 20px; background: var(--accent); color: #fff;
+  border: none; border-radius: 8px; font-size: 0.9rem;
+  font-weight: 600; cursor: pointer; font-family: var(--sans);
+}
+
+/* Scan cards */
+.scanCard {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 12px; margin-bottom: 0.75rem; overflow: hidden;
+  transition: border-color 0.15s;
+}
+.scanCard:hover { border-color: var(--border2); }
+
+.scanHeader {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1rem 1.25rem; cursor: pointer; gap: 1rem;
+}
+
+.scanLeft { display: flex; flex-direction: column; gap: 0.4rem; }
+.scanDate { font-weight: 500; font-size: 0.95rem; color: var(--text); }
+.scanBadges { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+.badge {
+  font-family: var(--mono); font-size: 11px; color: var(--muted);
+  background: var(--bg3); border: 1px solid var(--border);
+  padding: 2px 8px; border-radius: 100px;
+}
+.ghostBadge {
+  font-family: var(--mono); font-size: 11px; color: var(--accent);
+  background: rgba(255,59,59,0.1); border: 1px solid rgba(255,59,59,0.25);
+  padding: 2px 8px; border-radius: 100px;
+}
+
+.scanRight { display: flex; align-items: center; gap: 1rem; flex-shrink: 0; }
+.scanAmounts { display: flex; flex-direction: column; align-items: flex-end; gap: 0.2rem; }
+.scanTotal { font-family: var(--mono); font-size: 0.88rem; color: var(--muted); }
+.scanWasted { font-family: var(--mono); font-size: 0.88rem; color: var(--accent); }
+
+.scanActions { display: flex; align-items: center; gap: 0.5rem; }
+.viewBtn {
+  font-size: 0.82rem; padding: 5px 12px; border-radius: 7px;
+  background: var(--bg3); border: 1px solid var(--border2);
+  color: var(--text); cursor: pointer; font-family: var(--sans);
+  white-space: nowrap; transition: all 0.15s;
+}
+.viewBtn:hover { border-color: var(--accent); color: var(--accent); }
+.chevron { font-size: 10px; color: var(--muted); }
+
+/* Expanded detail */
+.scanDetail {
+  border-top: 1px solid var(--border);
+  padding: 0.75rem 1.25rem 1rem;
+  display: flex; flex-direction: column; gap: 0.4rem;
+  animation: slideDown 0.15s ease;
+}
+@keyframes slideDown { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+.loadingDetail { font-size: 0.85rem; color: var(--muted); padding: 0.5rem 0; }
+
+.subRow {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 0.6rem 0.75rem; border-radius: 8px; background: var(--bg3);
+  gap: 1rem;
+}
+.ghostRow { background: rgba(255,59,59,0.04); border: 1px solid rgba(255,59,59,0.15); }
+
+.subInfo { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.subName { font-size: 0.9rem; font-weight: 500; color: var(--text); }
+.subCat { font-family: var(--mono); font-size: 10px; text-transform: uppercase; color: var(--muted); letter-spacing: 0.05em; }
+.subReason { font-size: 0.8rem; color: var(--accent); margin-top: 2px; line-height: 1.4; }
+
+.subMeta { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.subAmount { font-family: var(--mono); font-size: 0.9rem; color: var(--text); }
+.ghostTag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em;
+  color: var(--accent); background: rgba(255,59,59,0.12);
+  border: 1px solid rgba(255,59,59,0.3); padding: 1px 7px; border-radius: 100px;
+}
+
+@media (max-width: 700px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .header { padding: 1rem 1.25rem; }
+  .main { padding: 2rem 1.25rem 4rem; }
+  .scanHeader { flex-direction: column; align-items: flex-start; }
+  .scanRight { width: 100%; justify-content: space-between; }
+}
