@@ -13,26 +13,18 @@ import google.generativeai as genai
 from pathlib import Path
 from dotenv import load_dotenv
 
+load_dotenv() 
 
-
-def load_env_from_root():
-    current = Path(__file__).resolve().parent
-    
-    for parent in [current, *current.parents]:
-        env_file = parent / ".env"
-        if env_file.exists():
-            load_dotenv(dotenv_path=env_file)
-            print(f"--> Successfully loaded .env from: {env_file}")
-            return
-            
-    print("--> Critical: Could not find .env file anywhere in parent directories!")
-
-load_env_from_root()
-
-DATABASE_URL = os.environ["DATABASE_URL"]
-SECRET_KEY   = os.environ.get("SECRET_KEY", "change-me-in-production-use-32-chars")
+DATABASE_URL = (
+    f"postgresql://{os.environ['POSTGRES_USER']}"
+    f":{os.environ['POSTGRES_PASSWORD']}"
+    f"@{os.environ['POSTGRES_HOST']}"
+    f":{os.environ['POSTGRES_PORT']}"
+    f"/{os.environ['POSTGRES_DB']}"
+)
+SECRET_KEY   = os.environ.get("SECRET_KEY")
 ALGORITHM    = "HS256"
-TOKEN_EXPIRE = 60 * 24 * 30   # 30 days
+TOKEN_EXPIRE = 60 * 24 * 30
 GEMINI_KEY   = os.environ.get("GEMINI_API_KEY", "")
 
 engine       = create_engine(DATABASE_URL)
