@@ -56,7 +56,6 @@
 .statValue { font-family: var(--display); font-size: 1.6rem; font-weight: 700; letter-spacing: -0.02em; }
 .accentStat .statValue { color: var(--accent); }
 
-.section { }
 .sectionTitle {
   font-family: var(--display); font-size: 1.1rem; font-weight: 700;
   letter-spacing: -0.01em; margin-bottom: 1rem;

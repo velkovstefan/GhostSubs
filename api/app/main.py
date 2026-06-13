@@ -5,12 +5,11 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, DateTime, Text
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Session
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 import bcrypt
 import google.generativeai as genai
-from pathlib import Path
 from dotenv import load_dotenv
 
 load_dotenv() 
