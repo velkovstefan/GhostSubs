@@ -49,7 +49,7 @@ export default function Auth({ onAuth }) {
             <h2 className={styles.title}>{mode === "login" ? "Welcome back" : "Create account"}</h2>
             <p className={styles.sub}>{mode === "login" ? "Log in to see your scan history" : "Sign up to save scans across sessions"}</p>
 
-            <form onSubmit={submit} className={styles.form}>
+            <form onSubmit={submit} className={styles.form} aria-label="login-form">
               <div className={styles.field}>
                 <label>Email</label>
                 <input type="email" placeholder="you@example.com" value={email}
