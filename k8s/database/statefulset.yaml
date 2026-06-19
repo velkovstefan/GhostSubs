@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ghostsubs-database
+  namespace: ghostsubs
+  labels:
+    app: database
+spec:
+  selector:
+    matchLabels:
+      app: database
+  serviceName: database-service
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+        - name: ghostsubs-database-container
+          image: postgres:16-alpine
+          envFrom:
+            - configMapRef:
+                name: database-config
+            - secretRef:
+                name: database-secret
+          ports:
+            - containerPort: 5432
+              name: db
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgredb
+  volumeClaimTemplates:
+    - metadata:
+        name: postgredb
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

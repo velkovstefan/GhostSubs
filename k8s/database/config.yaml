@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: database-config
+  namespace: ghostsubs
+data:
+  POSTGRES_HOST: database-service
+  POSTGRES_USER: myuser
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: ghost_subs_db
