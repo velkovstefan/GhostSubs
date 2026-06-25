@@ -6,6 +6,7 @@ metadata:
   labels:
     app: database
 spec:
+  clusterIP: None
   type: ClusterIP
   ports:
     - port: 5432
