@@ -6,7 +6,7 @@ metadata:
   labels:
     app: frontend
 spec:
-  replicas: 2
+  replicas: 5
   selector:
     matchLabels:
       app: frontend
@@ -24,11 +24,9 @@ spec:
       containers:
         - name: ghostsubs-frontend-container
           image: stefanvelkov/ghost-app-frontend:github-latest
-          env:
-            - name: API_HOST
-              value: "backend-service"
-            - name: API_PORT
-              value: "8000"
+          envFrom:
+            - configMapRef:
+                name: frontend-config
           imagePullPolicy: Always
           ports:
             - containerPort: 80

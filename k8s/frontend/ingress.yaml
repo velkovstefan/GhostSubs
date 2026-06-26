@@ -8,8 +8,7 @@ metadata:
 
 spec:
   rules:
-    - host: ghostsubs.local
-      http:
+    - http:
         paths:
           - path: "/api"
             pathType: Prefix

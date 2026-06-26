@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+  namespace: ghostsubs
+data:
+  API_HOST: "backend-service"
+  API_PORT: "8000"
