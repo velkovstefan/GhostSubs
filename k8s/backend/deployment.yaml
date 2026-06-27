@@ -26,6 +26,7 @@ spec:
       containers:
         - name: ghostsubs-backend-container
           image: stefanvelkov/ghost-app-api:github-latest
+          imagePullPolicy: Always
           envFrom:
             - secretRef:
                 name: backend-secret

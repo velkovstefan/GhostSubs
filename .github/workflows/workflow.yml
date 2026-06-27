@@ -148,7 +148,8 @@ jobs:
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
             cd ~/ghostsubs
-            git pull
+            git fetch origin
+            git reset --hard origin/main
 
             kubectl apply -f k8s/namespace.yaml
             kubectl apply -f k8s/database/ --server-side
@@ -157,6 +158,9 @@ jobs:
 
             kubectl rollout restart deployment/ghostsubs-backend -n ghostsubs
             kubectl rollout restart deployment/ghostsubs-frontend -n ghostsubs
+
+            kubectl scale deployment ghostsubs-backend -n ghostsubs --replicas=2
+            kubectl scale deployment ghostsubs-frontend -n ghostsubs --replicas=2
 
             kubectl rollout status deployment/ghostsubs-backend -n ghostsubs --timeout=120s
             kubectl rollout status deployment/ghostsubs-frontend -n ghostsubs --timeout=120s
