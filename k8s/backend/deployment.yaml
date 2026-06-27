@@ -33,6 +33,9 @@ spec:
                 name: database-config
             - secretRef:
                 name: database-secret
+          env:
+            - name: PGPOOL_HOST
+              value: pgpool-service.ghostsubs.svc.cluster.local
           resources:
             requests:
               memory: "128Mi"

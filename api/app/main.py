@@ -12,22 +12,27 @@ import bcrypt
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-load_dotenv() 
+load_dotenv()
 
-DATABASE_URL = (
-    f"postgresql://{os.environ['POSTGRES_USER']}"
-    f":{os.environ['POSTGRES_PASSWORD']}"
-    f"@{os.environ['POSTGRES_HOST']}"
-    f":{os.environ['POSTGRES_PORT']}"
-    f"/{os.environ['POSTGRES_DB']}"
-)
 SECRET_KEY   = os.environ.get("SECRET_KEY")
 ALGORITHM    = "HS256"
 TOKEN_EXPIRE = 60 * 24 * 30
 GEMINI_KEY   = os.environ.get("GEMINI_API_KEY", "")
 
-engine       = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+# Single connection through Pgpool — it handles read/write routing
+# and primary detection automatically, no application-level logic needed
+PGPOOL_HOST = os.environ.get("PGPOOL_HOST", "pgpool-service")
+
+DATABASE_URL = (
+    f"postgresql://{os.environ['POSTGRES_USER']}"
+    f":{os.environ['POSTGRES_PASSWORD']}"
+    f"@{PGPOOL_HOST}"
+    f":{os.environ['POSTGRES_PORT']}"
+    f"/{os.environ['POSTGRES_DB']}"
+)
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(bind=engine)
 
 class Base(DeclarativeBase):
     pass
@@ -82,7 +87,7 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     # Encode inputs to bytes and compare
     return bcrypt.checkpw(
-        plain_password.encode('utf-8'), 
+        plain_password.encode('utf-8'),
         hashed_password.encode('utf-8')
     )
 
@@ -196,6 +201,7 @@ def _to_monthly(amount: float, interval: str) -> float:
     return amount
 
 app = FastAPI(title="Ghost Subscriptions API")
+
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 class AuthRequest(BaseModel):
@@ -206,11 +212,11 @@ class TagRequest(BaseModel):
     is_ghost: bool
     reason:   Optional[str] = None
 
-@app.get("/health")
+@app.get("/api/health")
 def health():
     return {"status": "ok", "gemini_enabled": bool(GEMINI_KEY)}
 
-@app.post("/auth/register", status_code=201)
+@app.post("/api/auth/register", status_code=201)
 def register(body: AuthRequest, db: Session = Depends(get_db)):
     if db.query(User).filter(User.email == body.email).first():
         raise HTTPException(409, "Email already registered")
@@ -222,18 +228,18 @@ def register(body: AuthRequest, db: Session = Depends(get_db)):
     db.refresh(user)
     return {"token": create_token(user.id, user.email), "user": {"id": user.id, "email": user.email}}
 
-@app.post("/auth/login")
+@app.post("/api/auth/login")
 def login(body: AuthRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == body.email.lower().strip()).first()
     if not user or not verify_password(body.password, user.password):
         raise HTTPException(401, "Invalid email or password")
     return {"token": create_token(user.id, user.email), "user": {"id": user.id, "email": user.email}}
 
-@app.get("/auth/me")
+@app.get("/api/auth/me")
 def me(current_user: User = Depends(get_current_user)):
     return {"id": current_user.id, "email": current_user.email, "created_at": current_user.created_at.isoformat() if current_user.created_at else None}
 
-@app.post("/upload")
+@app.post("/api/upload")
 async def upload_csv(
     file: UploadFile = File(...),
     db:   Session    = Depends(get_db),
@@ -268,7 +274,7 @@ async def upload_csv(
     db.commit()
     return {"scan_id": scan_id, "count": len(subs_data)}
 
-@app.get("/scans")
+@app.get("/api/scans")
 def list_scans(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -292,7 +298,7 @@ def list_scans(
         })
     return result
 
-@app.get("/report/{scan_id}")
+@app.get("/api/report/{scan_id}")
 def get_report(scan_id: str, db: Session = Depends(get_db)):
     subs = db.query(Subscription).filter(Subscription.scan_id == scan_id).all()
     if not subs:
@@ -315,7 +321,7 @@ def get_report(scan_id: str, db: Session = Depends(get_db)):
         ],
     }
 
-@app.patch("/subscriptions/{sub_id}/tag")
+@app.patch("/api/subscriptions/{sub_id}/tag")
 def tag_subscription(sub_id: int, body: TagRequest, db: Session = Depends(get_db)):
     sub = db.get(Subscription, sub_id)
     if not sub:

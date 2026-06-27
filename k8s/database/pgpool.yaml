@@ -1,0 +1,172 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pgpool-sa
+  namespace: ghostsubs
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pgpool-role
+  namespace: ghostsubs
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "patch", "list"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pgpool-rolebinding
+  namespace: ghostsubs
+subjects:
+  - kind: ServiceAccount
+    name: pgpool-sa
+    namespace: ghostsubs
+roleRef:
+  kind: Role
+  apiGroup: rbac.authorization.k8s.io
+  name: pgpool-role
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgpool
+  namespace: ghostsubs
+  labels:
+    app: pgpool
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pgpool
+  template:
+    metadata:
+      labels:
+        app: pgpool
+    spec:
+      serviceAccountName: pgpool-sa
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - pgpool
+                topologyKey: kubernetes.io/hostname
+      volumes: # ← ДОДАДЕНО
+        - name: failover-scripts
+          configMap:
+            name: pgpool-failover-scripts
+            defaultMode: 0755
+      containers:
+        - name: pgpool
+          image: bitnamilegacy/pgpool:4.6.3-debian-12-r0
+          imagePullPolicy: IfNotPresent
+          volumeMounts: # ← ДОДАДЕНО
+            - name: failover-scripts
+              mountPath: /opt/bitnami/scripts/pgpool/failover.sh
+              subPath: failover.sh
+            - name: failover-scripts
+              mountPath: /opt/bitnami/scripts/pgpool/post_failover.sh
+              subPath: post_failover.sh
+          env:
+            - name: PGPOOL_BACKEND_NODES
+              value: "0:ghostsubs-database-0.database-service.ghostsubs.svc.cluster.local:5432,1:ghostsubs-database-1.database-service.ghostsubs.svc.cluster.local:5432"
+            - name: PGPOOL_SR_CHECK_USER
+              value: postgres
+            - name: PGPOOL_SR_CHECK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-secret
+                  key: POSTGRESQL_POSTGRES_PASSWORD
+            - name: PGPOOL_POSTGRES_USERNAME
+              value: postgres
+            - name: PGPOOL_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-secret
+                  key: POSTGRESQL_POSTGRES_PASSWORD
+            - name: PGPOOL_USERNAME
+              value: postgres
+            - name: PGPOOL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-secret
+                  key: POSTGRESQL_POSTGRES_PASSWORD
+            - name: PGPOOL_ADMIN_USERNAME
+              value: admin
+            - name: PGPOOL_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-secret
+                  key: POSTGRESQL_POSTGRES_PASSWORD
+            - name: PGPOOL_AUTHENTICATION_METHOD
+              value: scram-sha-256
+            - name: PGPOOL_ENABLE_LOAD_BALANCING
+              value: "yes"
+            - name: PGPOOL_BACKEND_APPLICATION_NAME0
+              value: ghostsubs-database-0
+            - name: PGPOOL_BACKEND_APPLICATION_NAME1
+              value: ghostsubs-database-1
+            - name: PGPOOL_HEALTH_CHECK_MAX_RETRIES
+              value: "5"
+            - name: PGPOOL_HEALTH_CHECK_RETRY_DELAY
+              value: "5"
+            - name: PGPOOL_CONNECT_TIMEOUT
+              value: "10000"
+            - name: PGPOOL_ENABLE_AUTO_FAILOVER
+              value: "yes"
+            - name: PGPOOL_HEALTH_CHECK_PERIOD
+              value: "10"
+            - name: PGPOOL_FAILOVER_COMMAND # ← ДОДАДЕНО
+              value: "/opt/bitnami/scripts/pgpool/failover.sh"
+            - name: PGPOOL_POST_FAILOVER_COMMAND # ← ДОДАДЕНО
+              value: "/opt/bitnami/scripts/pgpool/post_failover.sh"
+          ports:
+            - containerPort: 5432
+              name: pgpool
+          readinessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: 5432
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgpool-service
+  namespace: ghostsubs
+  labels:
+    app: pgpool
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: pgpool
+  selector:
+    app: pgpool

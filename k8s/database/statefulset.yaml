@@ -16,9 +16,54 @@ spec:
       labels:
         app: database
     spec:
+      initContainers:
+        - name: wait-for-primary
+          image: bitnamilegacy/postgresql-repmgr:16
+          env:
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-secret
+                  key: POSTGRESQL_POSTGRES_PASSWORD
+          command:
+            - /bin/sh
+            - -c
+            - |
+              if [ "$MY_POD_NAME" = "ghostsubs-database-0" ]; then
+                echo "I am database-0, starting immediately."
+                exit 0
+              fi
+
+              echo "I am $MY_POD_NAME, checking if a primary already exists..."
+
+              # Провери дали веќе постои primary (database-1 е промовиран)
+              # Ако да, стартувај веднаш без да чекаш database-0
+              for i in $(seq 1 5); do
+                PRIMARY_EXISTS=$(psql -h ghostsubs-database-1.database-service.ghostsubs.svc.cluster.local \
+                  -U postgres -tAc "SELECT NOT pg_is_in_recovery();" 2>/dev/null || echo "f")
+                if [ "$PRIMARY_EXISTS" = "t" ]; then
+                  echo "database-1 is already primary (failover occurred), starting immediately."
+                  exit 0
+                fi
+                sleep 2
+              done
+
+              # Нема постоечки primary, чекај database-0 (нормален старт)
+              echo "Waiting for database-0 to become primary..."
+              until pg_isready -h ghostsubs-database-0.database-service.ghostsubs.svc.cluster.local \
+                -p 5432 -U postgres; do
+                echo "database-0 not ready yet, retrying in 5s..."
+                sleep 5
+              done
+              echo "database-0 is ready, starting as replica."
       containers:
         - name: ghostsubs-database-container
           image: bitnamilegacy/postgresql-repmgr:16
+          imagePullPolicy: IfNotPresent
           envFrom:
             - configMapRef:
                 name: database-config
@@ -28,17 +73,58 @@ spec:
             - name: MY_POD_NAME
               valueFrom:
                 fieldRef:
+                  apiVersion: v1
                   fieldPath: metadata.name
             - name: REPMGR_NODE_NAME
-              value: "$(MY_POD_NAME)"
+              value: $(MY_POD_NAME)
             - name: REPMGR_NODE_NETWORK_NAME
-              value: "$(MY_POD_NAME).database-service"
+              value: $(MY_POD_NAME).database-service.ghostsubs.svc.cluster.local
+            - name: REPMGR_PRIMARY_HOST
+              value: ghostsubs-database-0.database-service.ghostsubs.svc.cluster.local
+            - name: REPMGR_PARTNER_NODES
+              value: ghostsubs-database-0.database-service.ghostsubs.svc.cluster.local,ghostsubs-database-1.database-service.ghostsubs.svc.cluster.local
+            - name: REPMGR_DEGRADED_MONITORING_TIMEOUT
+              value: "5"
+            - name: REPMGR_RECONNECT_ATTEMPTS
+              value: "3"
+            - name: REPMGR_RECONNECT_INTERVAL
+              value: "5"
+            - name: POSTGRESQL_EXTRA_FLAGS
+              value: "-c password_encryption=scram-sha-256"
+            - name: POSTGRESQL_HBA_AUTH_METHOD
+              value: scram-sha-256
+            - name: POSTGRESQL_HBA_AUTH_METHOD_REPLICATION
+              value: scram-sha-256
           ports:
             - containerPort: 5432
               name: db
           volumeMounts:
             - mountPath: /bitnami/postgresql
               name: postgredb
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    until pg_isready -U postgres -h 127.0.0.1 -p 5432; do
+                      sleep 2
+                    done
+                    IS_PRIMARY=$(psql -U postgres -h 127.0.0.1 -tAc "SELECT NOT pg_is_in_recovery();")
+                    if [ "$IS_PRIMARY" = "t" ]; then
+                      echo "Primary - granting pg_monitor to repmgr..."
+                      psql -U postgres -h 127.0.0.1 -c "GRANT pg_monitor TO repmgr;" || true
+                    else
+                      echo "Replica - skipping grant."
+                    fi
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
   volumeClaimTemplates:
     - metadata:
         name: postgredb
@@ -46,4 +132,4 @@ spec:
         accessModes: ["ReadWriteOnce"]
         resources:
           requests:
-            storage: 1Gi
+            storage: 2Gi

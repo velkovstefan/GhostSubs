@@ -5,8 +5,11 @@ metadata:
   namespace: ghostsubs
   labels:
     app.kubernetes.io/name: ghostsubs-ingress
+  # annotations:
+  # traefik.ingress.kubernetes.io/router.middlewares: ghostsubs-strip-api@kubernetescrd
 
 spec:
+  ingressClassName: traefik
   rules:
     - http:
         paths:

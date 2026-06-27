@@ -4,10 +4,9 @@ metadata:
   name: database-config
   namespace: ghostsubs
 data:
-  POSTGRES_HOST: database-service
-  POSTGRES_USER: myuser
+  POSTGRES_HOST: database-service.ghostsubs.svc.cluster.local
+  POSTGRES_PRIMARY: ghostsubs-database-0.database-service.ghostsubs.svc.cluster.local
+  POSTGRES_USER: postgres
   POSTGRES_PORT: "5432"
   POSTGRES_DB: ghost_subs_db
-  REPMGR_PARTNER_NODES: "ghostsubs-database-0.database-service,ghostsubs-database-1.database-service"
-  REPMGR_PRIMARY_HOST: "ghostsubs-database-0.database-service"
   REPMGR_PORT_NUMBER: "5432"

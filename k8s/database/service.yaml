@@ -11,5 +11,23 @@ spec:
   ports:
     - port: 5432
       targetPort: 5432
+      name: db
   selector:
     app: database
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: database-primary
+  namespace: ghostsubs
+  labels:
+    app: database
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5432
+      targetPort: 5432
+      name: db
+  selector:
+    app: database
+    statefulset.kubernetes.io/pod-name: ghostsubs-database-0

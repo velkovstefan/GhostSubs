@@ -149,9 +149,16 @@ jobs:
           script: |
             cd ~/ghostsubs
             git pull
+
             kubectl apply -f k8s/namespace.yaml
-            kubectl apply -f k8s/database/
+            kubectl apply -f k8s/database/ --server-side
             kubectl apply -f k8s/backend/
             kubectl apply -f k8s/frontend/
-            kubectl rollout restart deployment ghostsubs-backend -n ghostsubs
-            kubectl rollout restart deployment ghostsubs-frontend -n ghostsubs
+            kubectl apply -f k8s/pgpool/
+
+            kubectl rollout restart deployment/ghostsubs-backend -n ghostsubs
+            kubectl rollout restart deployment/ghostsubs-frontend -n ghostsubs
+
+            kubectl rollout status deployment/ghostsubs-backend -n ghostsubs --timeout=120s
+            kubectl rollout status deployment/ghostsubs-frontend -n ghostsubs --timeout=120s
+            kubectl rollout status deployment/pgpool -n ghostsubs --timeout=60s

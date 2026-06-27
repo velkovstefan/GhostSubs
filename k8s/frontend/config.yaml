@@ -4,5 +4,5 @@ metadata:
   name: frontend-config
   namespace: ghostsubs
 data:
-  API_HOST: "backend-service"
+  API_HOST: "backend-service.ghostsubs.svc.cluster.local"
   API_PORT: "8000"
