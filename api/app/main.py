@@ -11,6 +11,7 @@ from jose import JWTError, jwt
 import bcrypt
 import google.generativeai as genai
 from dotenv import load_dotenv
+from contextlib import asynccontextmanager
 
 load_dotenv()
 
@@ -64,7 +65,12 @@ class Subscription(Base):
     reason     = Column(Text, nullable=True)
     tagged_at  = Column(DateTime, nullable=True)
 
-Base.metadata.create_all(bind=engine)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
+
 
 def get_db():
     db = SessionLocal()
@@ -200,7 +206,7 @@ def _to_monthly(amount: float, interval: str) -> float:
     if interval == "yearly":  return amount / 12
     return amount
 
-app = FastAPI(title="Ghost Subscriptions API")
+app = FastAPI(title="Ghost Subscriptions API", lifespan=lifespan)
 
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
