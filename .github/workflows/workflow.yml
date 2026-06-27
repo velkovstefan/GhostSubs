@@ -154,7 +154,6 @@ jobs:
             kubectl apply -f k8s/database/ --server-side
             kubectl apply -f k8s/backend/
             kubectl apply -f k8s/frontend/
-            kubectl apply -f k8s/pgpool/
 
             kubectl rollout restart deployment/ghostsubs-backend -n ghostsubs
             kubectl rollout restart deployment/ghostsubs-frontend -n ghostsubs
