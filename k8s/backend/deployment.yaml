@@ -7,7 +7,6 @@ metadata:
     app: backend
 spec:
   replicas: 3
-
   selector:
     matchLabels:
       app: backend
@@ -23,6 +22,17 @@ spec:
         role: backend
 
     spec:
+      initContainers:
+        - name: wait-for-db
+          image: postgres:16-alpine
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h pgpool-service.ghostsubs.svc.cluster.local -p 5432; do
+                echo "Waiting for database..."
+                sleep 2
+              done
       containers:
         - name: ghostsubs-backend-container
           image: stefanvelkov/ghost-app-api:github-latest
@@ -34,9 +44,6 @@ spec:
                 name: database-config
             - secretRef:
                 name: database-secret
-          env:
-            - name: PGPOOL_HOST
-              value: pgpool-service.ghostsubs.svc.cluster.local
           resources:
             requests:
               memory: "128Mi"
@@ -46,3 +53,15 @@ spec:
               cpu: "500m"
           ports:
             - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20

@@ -24,16 +24,28 @@ spec:
       containers:
         - name: ghostsubs-frontend-container
           image: stefanvelkov/ghost-app-frontend:github-latest
+          imagePullPolicy: Always
           envFrom:
             - configMapRef:
                 name: frontend-config
-          imagePullPolicy: Always
           ports:
             - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 20
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "100m"
+              memory: "32Mi"
+              cpu: "25m"
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: "128Mi"
+              cpu: "200m"

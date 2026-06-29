@@ -95,7 +95,7 @@ jobs:
       POSTGRES_PASSWORD: testpass
       POSTGRES_PORT: 5432
       POSTGRES_DB: ghostsubdb_test
-      SECRET_KEY: X9kR#mP2$vL8nQ4wJ6hT0yA5cF3eDgZs
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
     steps:
       - name: Checkout test
         uses: actions/checkout@v4

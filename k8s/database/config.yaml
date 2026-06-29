@@ -4,8 +4,7 @@ metadata:
   name: database-config
   namespace: ghostsubs
 data:
-  POSTGRES_HOST: database-service.ghostsubs.svc.cluster.local
-  POSTGRES_PRIMARY: ghostsubs-database-0.database-service.ghostsubs.svc.cluster.local
+  POSTGRES_HOST: pgpool-service.ghostsubs.svc.cluster.local
   POSTGRES_USER: postgres
   POSTGRES_PORT: "5432"
   POSTGRES_DB: ghost_subs_db

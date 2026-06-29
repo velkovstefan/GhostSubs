@@ -22,7 +22,7 @@ GEMINI_KEY   = os.environ.get("GEMINI_API_KEY", "")
 
 # Single connection through Pgpool — it handles read/write routing
 # and primary detection automatically, no application-level logic needed
-PGPOOL_HOST = os.environ.get("PGPOOL_HOST", "pgpool-service")
+PGPOOL_HOST = os.environ.get("POSTGRES_HOST", "pgpool-service")
 
 DATABASE_URL = (
     f"postgresql://{os.environ['POSTGRES_USER']}"

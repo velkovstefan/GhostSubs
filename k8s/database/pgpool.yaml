@@ -39,7 +39,7 @@ metadata:
   labels:
     app: pgpool
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: pgpool
@@ -61,7 +61,7 @@ spec:
                       values:
                         - pgpool
                 topologyKey: kubernetes.io/hostname
-      volumes: # ← ДОДАДЕНО
+      volumes:
         - name: failover-scripts
           configMap:
             name: pgpool-failover-scripts
@@ -70,7 +70,7 @@ spec:
         - name: pgpool
           image: bitnamilegacy/pgpool:4.6.3-debian-12-r0
           imagePullPolicy: IfNotPresent
-          volumeMounts: # ← ДОДАДЕНО
+          volumeMounts:
             - name: failover-scripts
               mountPath: /opt/bitnami/scripts/pgpool/failover.sh
               subPath: failover.sh
